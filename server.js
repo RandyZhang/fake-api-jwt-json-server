@@ -91,6 +91,36 @@ server.post('/auth/login', (req, res) => {
   res.status(200).json({ access_token })
 })
 
+// Logout
+server.delete('/auth/logout', (req, res) => {
+  console.log('Loging out...');
+  if (req.headers.authorization === undefined || req.headers.authorization.split(' ')[0] !== 'Bearer') {
+    const status = 401
+    const message = 'Error in authorization format'
+    res.status(status).json({ status, message })
+    return
+  }
+  try {
+    let verifyTokenResult;
+    verifyTokenResult = verifyToken(req.headers.authorization.split(' ')[1]);
+
+    if (verifyTokenResult instanceof Error) {
+      const status = 401
+      const message = 'Access token not provided'
+      res.status(status).json({ status, message })
+      return
+    }
+
+    res.status(200).json({})
+    return
+  } catch (err) {
+    console.log("Randy Error:",err);
+    const status = 401
+    const message = 'Error access_token is revoked'
+    res.status(status).json({ status, message })
+  }
+})
+
 server.use(/^(?!\/auth).*$/, (req, res, next) => {
   if (req.headers.authorization === undefined || req.headers.authorization.split(' ')[0] !== 'Bearer') {
     const status = 401
